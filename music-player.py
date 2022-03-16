@@ -8,39 +8,45 @@ import time
 
 import Adafruit_BBIO.GPIO as GPIO
 
-KEYS = ["P8_8", "P8_10", "P8_12", "P8_14", "P8_16", "P8_18", "P9_12"]
-UP = KEYS[0]
-DOWN = KEYS[1]
+KEYS = ["P8_8", "P8_10", "P8_12", "P8_14", "P8_16"]
+GNDK = "P8_18"
+UP = KEYS[4]
+DOWN = KEYS[3]
 LEFT = KEYS[2]
-RIGHT = KEYS[3]
-MID = KEYS[4]
-SET = KEYS[5]
-RST = KEYS[6]
-LEDS = ["P8_7", "P8_9", "P8_11"]
+RIGHT = KEYS[1]
+MID = KEYS[0]
+
+LEDS = ["P9_11", "P9_13", "P9_15"]
+GNDL = "P9_17"
 BLUE = LEDS[0]
-GREEN = LEDS[1]
-RED = LEDS[2]
+RED = LEDS[1]
+GREEN = LEDS[2]
+
 STATES = [GPIO.HIGH, GPIO.LOW]
 
 def _init_key():
     for key in KEYS:
-        GPIO.setup(key, GPIO.IN)
+        GPIO.setup(key, GPIO.IN, GPIO.PUD_UP)
         GPIO.add_event_detect(key, GPIO.FALLING)
+    GPIO.setup(GNDK, GPIO.OUT)
+    GPIO.output(GNDK, GPIO.LOW)
     for led in LEDS:
         GPIO.setup(led, GPIO.OUT)
+    GPIO.setup(GNDL, GPIO.OUT)
+    GPIO.output(GNDL, GPIO.LOW)
 
 def _read_step(size):
-    if GPIO.event_detected(RST):
+    if GPIO.event_detected(LEFT):
         GPIO.output(RED, GPIO.HIGH);
         GPIO.output(GREEN, GPIO.LOW);
         GPIO.output(BLUE, GPIO.LOW);
         return -1
-    elif GPIO.event_detected(SET):
+    elif GPIO.event_detected(RIGHT):
         GPIO.output(RED, GPIO.LOW);
         GPIO.output(GREEN, GPIO.HIGH);
         GPIO.output(BLUE, GPIO.LOW);
         return 1
-    elif GPIO.event_detected(UP) or GPIO.event_detected(DOWN) or GPIO.event_detected(LEFT) or GPIO.event_detected(RIGHT) or GPIO.event_detected(MID):
+    elif GPIO.event_detected(UP) or GPIO.event_detected(DOWN) or GPIO.event_detected(MID):
         GPIO.output(RED, random.choice(STATES));
         GPIO.output(GREEN, random.choice(STATES));
         GPIO.output(BLUE, random.choice(STATES));
